@@ -781,7 +781,7 @@ if __name__ == "__main__":
     # Create the manga object
     manga = Mangaread(url_manga=url, name=name, nb_threads=args.threads, debug=args.debug)
     # Download the manga
-    sucsess = manga.download(args.force)
+    success = manga.download(args.force)
     # Convert the manga
     if success:
         manga.convert(convert, args.convert_one_file)
