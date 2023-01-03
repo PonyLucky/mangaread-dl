@@ -44,7 +44,7 @@ class Mangaread:
             # Camel case
             self.manga_name = " ".join([word.capitalize() for word in self.manga_name.split("-")])
         # Manga path
-        self.manga_path = os.path.join(os.getcwd(), "manga", self.manga_name)
+        self.manga_path = os.path.join(os.getcwd(), "mangaread-dl", self.manga_name)
         # Chapter path
         self.chapter_path = "Chapter {}/"
         # Image path

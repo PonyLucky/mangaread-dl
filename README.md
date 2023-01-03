@@ -5,9 +5,17 @@ This script helps you to download manga from mangaread.org.
 - Python 3.6 or higher.
 - Modules: `pip install -r requirements.txt`.
 
+## Recommended
+- If on Linux, running:
+```bash
+alias mangaread-dl="python ~/PATH/TO/SCRIPT/mangaread-dl.py"
+```
+Will allow you to run the script from anywhere with the command `mangaread-dl`. The output directory will be the current directory + `mangaread-dl/`.
+
 ## Usage
 - `python mangaread.py -h` for help.
 - `python mangaread.py -u "URL_MANGA"` to download the manga from the URL.
+- `python mangaread.py` The script will ask you for the URL, name and format to convert the manga.
 
 ## Parameters
 ### -h, --help
