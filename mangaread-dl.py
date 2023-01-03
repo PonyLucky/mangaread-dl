@@ -37,8 +37,12 @@ class Mangaread:
             self.manga_name = name
         elif self.url_manga.endswith("/"):
             self.manga_name = self.url_manga.split("/")[-2]
+            # Camel case
+            self.manga_name = " ".join([word.capitalize() for word in self.manga_name.split("-")])
         else:
             self.manga_name = self.url_manga.split("/")[-1]
+            # Camel case
+            self.manga_name = " ".join([word.capitalize() for word in self.manga_name.split("-")])
         # Manga path
         self.manga_path = os.path.join(os.getcwd(), "manga", self.manga_name)
         # Chapter path
