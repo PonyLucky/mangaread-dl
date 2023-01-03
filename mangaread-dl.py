@@ -19,12 +19,13 @@ import bs4
 import os
 import json
 import re
+import shutil
 from datetime import datetime
 from modernqueue import ModernQueue
 from zipfile import ZipFile
 
 class Mangaread:
-    def __init__(self, url_manga: str, nb_threads: int = 5, debug: bool = False) -> None:
+    def __init__(self, url_manga: str, name: str, nb_threads: int = 5, debug: bool = False) -> None:
         # Debug mode
         self.debug = debug
         # Url of the manga
@@ -32,7 +33,9 @@ class Mangaread:
         # Number of threads
         self.nb_threads = nb_threads
         # Manga name
-        if self.url_manga.endswith("/"):
+        if name != None:
+            self.manga_name = name
+        elif self.url_manga.endswith("/"):
             self.manga_name = self.url_manga.split("/")[-2]
         else:
             self.manga_name = self.url_manga.split("/")[-1]
@@ -376,6 +379,37 @@ class Mangaread:
             # Save data
             self._save_data()
 
+    def _delete_folders(self) -> None:
+        """
+        This function will delete the folders.
+        """
+        # For each chapter
+        for i in range(self.currentChapterDownloaded):
+            # Infos of the chapter
+            chapter = self.chapters[i]
+            # Name of the chapter, without special characters
+            chapter_name = re.sub(r"[^a-zA-Z0-9]+", " ", chapter["name"])
+            # Get the index after "Chapter DIGITS"
+            index = 0
+            if chapter_name.startswith("Chapter "):
+                index = re.search(r"Chapter \d+", chapter_name).end()
+            # Get the chapter number and force number to 4 digits
+            chapter_number = i + 1
+            chapter_number = str(chapter_number).zfill(4)
+            # Set the chapter name
+            if chapter_name[index+1:].strip() == "":
+                chapter_name = f"Chapter {chapter_number}"
+            else:
+                chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
+            # Path of the chapter
+            chapter_path = os.path.join(self.manga_path, chapter_name)
+            if not os.path.exists(chapter_path):
+                continue
+            # Print a message
+            print("> Deleting '{}'".format(chapter_name))
+            # Delete the folder
+            shutil.rmtree(chapter_path, ignore_errors=True)
+
     def _convert_to_cbz(self, one_file: bool = False) -> None:
         """
         This function will convert the images to cbz.
@@ -415,6 +449,8 @@ class Mangaread:
                         chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                     # Path of the chapter
                     chapter_path = os.path.join(self.manga_path, chapter_name)
+                    if not os.path.exists(chapter_path):
+                        continue
                     # For each image
                     for image in os.listdir(chapter_path):
                         # continue if extension is cbz, zip
@@ -445,6 +481,8 @@ class Mangaread:
                     chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                 # Path of the chapter
                 chapter_path = os.path.join(self.manga_path, chapter_name)
+                if not os.path.exists(chapter_path):
+                    continue
                 # Path of the cbz
                 cbz_path = os.path.join(
                     self.manga_path,
@@ -506,6 +544,8 @@ class Mangaread:
                         chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                     # Path of the chapter
                     chapter_path = os.path.join(self.manga_path, chapter_name)
+                    if not os.path.exists(chapter_path):
+                        continue
                     # For each image
                     for image in os.listdir(chapter_path):
                         # continue if extension is cbz, zip
@@ -536,6 +576,8 @@ class Mangaread:
                     chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                 # Path of the chapter
                 chapter_path = os.path.join(self.manga_path, chapter_name)
+                if not os.path.exists(chapter_path):
+                    continue
                 # Path of the zip
                 zip_path = os.path.join(
                     self.manga_path,
@@ -673,12 +715,30 @@ class Mangaread:
         # Print a message
         print("> Conversion finished")
 
+        # Ask the user if he wants to delete the folders
+        ok = False
+        while ok == False:
+            print("'y' to delete folders ; 'n' to keep folders")
+            # Ask the user
+            answer = input("Do you want to delete the image folders ? (y/n) ")
+            # If the answer is yes
+            if answer.lower() == "y":
+                ok = True
+                # Delete the folders
+                self._delete_folders()
+            # If the answer is no
+            elif answer.lower() == "n":
+                ok = True
+            else:
+                print("> Unknown answer")
+
 
 if __name__ == "__main__":
     # Create the parser
     parser = argparse.ArgumentParser(description="Download manga from mangadex")
     # Add the arguments
     parser.add_argument("-u", "--url", type=str, help="Url of the manga")
+    parser.add_argument("-mn", "--manga-name", type=str, help="Friendly name of the manga.", default=None)
     parser.add_argument("-f", "--force", action="store_true", help="Force download")
     parser.add_argument("-t", "--threads", type=int, help="Number of threads", default=10)
     parser.add_argument("-c", "--convert", type=str, help="Convert the manga to: cbz, zip", default=None, choices=["cbz", "zip"])
@@ -686,8 +746,9 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", action="store_true", help="Debug mode")
     # Parse the arguments
     args = parser.parse_args()
+
     # Create the manga object
-    manga = Mangaread(url_manga=args.url, nb_threads=args.threads, debug=args.debug)
+    manga = Mangaread(url_manga=args.url, name=args.manga_name, nb_threads=args.threads, debug=args.debug)
     # Download the manga
     sucess = manga.download(args.force)
     # Convert the manga

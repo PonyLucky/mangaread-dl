@@ -24,6 +24,13 @@ URL of the manga to download.
 python mangaread.py -u "https://www.mangaread.org/manga/one-piece"
 ```
 
+### -mn MANGA_NAME, --manga-name MANGA_NAME
+Name of the manga to download. If not specified, the name will be extracted from the URL.
+
+```bash
+python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -mn "One Piece"
+```
+
 ### -c FORMAT, --convert FORMAT
 Convert the manga to the specified format. The format can be `zip` or `cbz`.
 
