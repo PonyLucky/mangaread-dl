@@ -214,9 +214,14 @@ class Mangaread:
                 "name": chapter_name,
                 "images": url_images
             }
+        # If currentChapterScrapped is equal to the number of chapters and different from 0
+        if self.currentChapterScrapped == len(self.url_chapters) and self.currentChapterScrapped != 0:
+            # Return True
+            return True
         is_finished = False
         try:
             queue = ModernQueue(max_threads=self.nb_threads)
+            self.print_debug(f"Images scrapping from {self.currentChapterScrapped} to {len(self.url_chapters)}")
             # Getting the images
             for i in range(self.currentChapterScrapped, len(self.url_chapters)):
                 # Url of the chapter
