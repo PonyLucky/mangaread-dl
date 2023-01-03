@@ -736,6 +736,12 @@ class Mangaread:
             else:
                 print("> Unknown answer")
 
+    def print_output_dir(self):
+        """
+        This function will print the output directory.
+        """
+        print("> Output directory : {}".format(self.manga_path))
+
 
 if __name__ == "__main__":
     # Create the parser
@@ -751,13 +757,35 @@ if __name__ == "__main__":
     # Parse the arguments
     args = parser.parse_args()
 
+    # If the url is not given
+    url = None
+    name = None
+    convert = None
+    if args.url == None:
+        # Ask the user
+        while True:
+            url = input("Url of the manga: ")
+            if url != "":
+                break
+        name = input("Name of the manga (optional): ")
+        while True:
+            convert = input("Convert to cbz or zip (optional): ")
+            if convert == "" or convert == "cbz" or convert == "zip":
+                break
+    else:
+        url = args.url
+        name = args.manga_name
+        convert = args.convert
+
+
     # Create the manga object
-    manga = Mangaread(url_manga=args.url, name=args.manga_name, nb_threads=args.threads, debug=args.debug)
+    manga = Mangaread(url_manga=url, name=name, nb_threads=args.threads, debug=args.debug)
     # Download the manga
-    sucess = manga.download(args.force)
+    sucsess = manga.download(args.force)
     # Convert the manga
-    if sucess:
-        manga.convert(args.convert, args.convert_one_file)
+    if success:
+        manga.convert(convert, args.convert_one_file)
+        manga.print_output_dir()
 
     # Wait for a key press
     input("\nPress any key to exit...")
