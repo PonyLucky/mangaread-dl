@@ -63,7 +63,7 @@ class Mangaread:
             os.makedirs(self.manga_path)
         
         # Remove 'mangaread-dl.log'
-        self.log_path = os.path.join(os.getcwd(), "mangaread-dl.log")
+        self.log_path = os.path.join(os.getcwd(), "mangaread-dl", "mangaread-dl.log")
         if os.path.exists(self.log_path):
             os.remove(self.log_path)
         
