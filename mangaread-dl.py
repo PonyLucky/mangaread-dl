@@ -151,66 +151,84 @@ class Mangaread:
         Returns:
             bool: True if scraping was successful, False otherwise.
         """
+        def get_images_from_chapter(chapter: str, i, _self) -> dict:
+            # Getting the html of the chapter
+            html = requests.get(chapter)
+            # Parsing the html
+            soup = bs4.BeautifulSoup(html.text, "html.parser")
+            # Getting the images
+            # div.reading-content img
+            images = soup.select("div.reading-content img")
+            _self.print_debug(f"Images found for chapter {i+1}:")
+            _self.print_debug(f"- {images}")
+
+            # Get chapter name
+            chapter_name = soup.select_one("h1#chapter-heading").text.split(" - ")[-1]
+            _self.print_debug(f"Chapter name: {chapter_name}")
+
+            # Remove special characters
+            chapter_name = re.sub(r"[^a-zA-Z0-9 ]", "", chapter_name)
+
+            # Get the index after "Chapter DIGITS"
+            index = 0
+            if chapter_name.startswith("Chapter "):
+                index = re.search(r"Chapter \d+", chapter_name).end()
+            # Get the chapter number and force number to 4 digits
+            chapter_number = i + 1
+            chapter_number = str(chapter_number).zfill(4)
+            # Set the chapter name
+            if chapter_name[index+1:].strip() == "":
+                chapter_name = f"Chapter {chapter_number}"
+            else:
+                chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
+
+            url_images = []
+            # Getting the url of the images
+            for image in images:
+                # Replace all "\n" and "\t", spaces with ""
+                url = re.sub(r"[\n\t ]", "", image["data-src"])
+                # url in is the 'data-src' attribute
+                url_images.append(url)
+            
+
+            # Set current chapter
+            _self.currentChapterScrapped = i + 1
+
+            # Print a message
+            print("> {} images found from '{}' - {}/{}".format(
+                len(url_images),
+                chapter_name,
+                _self.currentChapterScrapped,
+                len(_self.url_chapters))
+            )
+
+            # Return the chapter infos
+            return {
+                "name": chapter_name,
+                "images": url_images
+            }
         is_finished = False
         try:
+            queue = ModernQueue(max_threads=self.nb_threads)
             # Getting the images
             for i in range(self.currentChapterScrapped, len(self.url_chapters)):
                 # Url of the chapter
                 chapter = self.url_chapters[i]
-                # Getting the html of the chapter
-                html = requests.get(chapter)
-                # Parsing the html
-                soup = bs4.BeautifulSoup(html.text, "html.parser")
-                # Getting the images
-                # div.reading-content img
-                images = soup.select("div.reading-content img")
-                self.print_debug(f"Images found for chapter {i+1}:")
-                self.print_debug(f"- {images}")
-
-                # Get chapter name
-                chapter_name = soup.select_one("h1#chapter-heading").text.split(" - ")[-1]
-                self.print_debug(f"Chapter name: {chapter_name}")
-
-                # Remove special characters
-                chapter_name = re.sub(r"[^a-zA-Z0-9 ]", "", chapter_name)
-
-                # Get the index after "Chapter DIGITS"
-                index = 0
-                if chapter_name.startswith("Chapter "):
-                    index = re.search(r"Chapter \d+", chapter_name).end()
-                # Get the chapter number and force number to 4 digits
-                chapter_number = i + 1
-                chapter_number = str(chapter_number).zfill(4)
-                # Set the chapter name
-                if chapter_name[index+1:].strip() == "":
-                    chapter_name = f"Chapter {chapter_number}"
-                else:
-                    chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
-
-                url_images = []
-                # Getting the url of the images
-                for image in images:
-                    # Replace all "\n" and "\t", spaces with ""
-                    url = re.sub(r"[\n\t ]", "", image["data-src"])
-                    # url in is the 'data-src' attribute
-                    url_images.append(url)
-                
-                # Add to chapters
-                self.chapters.append({
-                    "name": chapter_name,
-                    "images": url_images
-                })
-
-                # Set current chapter
-                self.currentChapterScrapped = i + 1
-
-                # Print a message
-                print("> {} images found from '{}' - {}/{}".format(
-                    len(url_images),
-                    chapter_name,
-                    self.currentChapterScrapped,
-                    len(self.url_chapters))
+                queue.add(
+                    func=get_images_from_chapter,
+                    args={
+                        "chapter": chapter,
+                        "i": i,
+                        "_self": self
+                    }
                 )
+            # Run the queue
+            queue.run()
+            # Get the results
+            results = queue.get_results()
+            # Add the results to the chapters
+            self.chapters.extend(results)
+
             # Set is_finished to True
             is_finished = True
             # Print a message
@@ -383,6 +401,18 @@ class Mangaread:
                     chapter = self.chapters[i]
                     # Name of the chapter, without special characters
                     chapter_name = re.sub(r"[^a-zA-Z0-9]+", " ", chapter["name"])
+                    # Get the index after "Chapter DIGITS"
+                    index = 0
+                    if chapter_name.startswith("Chapter "):
+                        index = re.search(r"Chapter \d+", chapter_name).end()
+                    # Get the chapter number and force number to 4 digits
+                    chapter_number = i + 1
+                    chapter_number = str(chapter_number).zfill(4)
+                    # Set the chapter name
+                    if chapter_name[index+1:].strip() == "":
+                        chapter_name = f"Chapter {chapter_number}"
+                    else:
+                        chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                     # Path of the chapter
                     chapter_path = os.path.join(self.manga_path, chapter_name)
                     # For each image
@@ -401,8 +431,18 @@ class Mangaread:
                 chapter = self.chapters[i]
                 # Name of the chapter, without special characters
                 chapter_name = re.sub(r"[^a-zA-Z0-9]+", " ", chapter["name"])
-                # Url of the images
-                url_images = chapter["images"]
+                # Get the index after "Chapter DIGITS"
+                index = 0
+                if chapter_name.startswith("Chapter "):
+                    index = re.search(r"Chapter \d+", chapter_name).end()
+                # Get the chapter number and force number to 4 digits
+                chapter_number = i + 1
+                chapter_number = str(chapter_number).zfill(4)
+                # Set the chapter name
+                if chapter_name[index+1:].strip() == "":
+                    chapter_name = f"Chapter {chapter_number}"
+                else:
+                    chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                 # Path of the chapter
                 chapter_path = os.path.join(self.manga_path, chapter_name)
                 # Path of the cbz
@@ -452,6 +492,18 @@ class Mangaread:
                     chapter = self.chapters[i]
                     # Name of the chapter, without special characters
                     chapter_name = re.sub(r"[^a-zA-Z0-9]+", " ", chapter["name"])
+                    # Get the index after "Chapter DIGITS"
+                    index = 0
+                    if chapter_name.startswith("Chapter "):
+                        index = re.search(r"Chapter \d+", chapter_name).end()
+                    # Get the chapter number and force number to 4 digits
+                    chapter_number = i + 1
+                    chapter_number = str(chapter_number).zfill(4)
+                    # Set the chapter name
+                    if chapter_name[index+1:].strip() == "":
+                        chapter_name = f"Chapter {chapter_number}"
+                    else:
+                        chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                     # Path of the chapter
                     chapter_path = os.path.join(self.manga_path, chapter_name)
                     # For each image
@@ -470,8 +522,18 @@ class Mangaread:
                 chapter = self.chapters[i]
                 # Name of the chapter, without special characters
                 chapter_name = re.sub(r"[^a-zA-Z0-9]+", " ", chapter["name"])
-                # Url of the images
-                url_images = chapter["images"]
+                # Get the index after "Chapter DIGITS"
+                index = 0
+                if chapter_name.startswith("Chapter "):
+                    index = re.search(r"Chapter \d+", chapter_name).end()
+                # Get the chapter number and force number to 4 digits
+                chapter_number = i + 1
+                chapter_number = str(chapter_number).zfill(4)
+                # Set the chapter name
+                if chapter_name[index+1:].strip() == "":
+                    chapter_name = f"Chapter {chapter_number}"
+                else:
+                    chapter_name = f"Chapter {chapter_number} - {chapter_name[index:].strip()}"
                 # Path of the chapter
                 chapter_path = os.path.join(self.manga_path, chapter_name)
                 # Path of the zip
@@ -512,6 +574,8 @@ class Mangaread:
             print("> Force download")
             # Set currentChapterDownloaded to 0
             self.currentChapterDownloaded = 0
+            # Set currentChapterScrapped to 0
+            self.currentChapterScrapped = 0
 
         self.print_debug("Getting chapters")
         # Scrap the chapters
@@ -523,7 +587,7 @@ class Mangaread:
         if self.currentChapterScrapped != 0 and self.currentChapterDownloaded == self.currentChapterScrapped:
             print("> Manga already downloaded")
             print("There is no new chapter")
-            return
+            return True
         
         self.print_debug("Getting images")
         # Scrap the images
