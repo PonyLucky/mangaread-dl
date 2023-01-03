@@ -25,7 +25,7 @@ from modernqueue import ModernQueue
 from zipfile import ZipFile
 
 class Mangaread:
-    def __init__(self, url_manga: str, name: str, nb_threads: int = 5, debug: bool = False) -> None:
+    def __init__(self, url_manga: str, name: str, nb_threads: int = 15, debug: bool = False) -> None:
         # Debug mode
         self.debug = debug
         # Url of the manga
@@ -755,7 +755,7 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--url", type=str, help="Url of the manga")
     parser.add_argument("-mn", "--manga-name", type=str, help="Friendly name of the manga.", default=None)
     parser.add_argument("-f", "--force", action="store_true", help="Force download")
-    parser.add_argument("-t", "--threads", type=int, help="Number of threads", default=10)
+    parser.add_argument("-t", "--threads", type=int, help="Number of threads", default=15)
     parser.add_argument("-c", "--convert", type=str, help="Convert the manga to: cbz, zip", default=None, choices=["cbz", "zip"])
     parser.add_argument("-cof", "--convert-one-file", action="store_true", help="Convert the manga to one file")
     parser.add_argument("-d", "--debug", action="store_true", help="Debug mode")

@@ -54,7 +54,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -c "zip" -cof
 ```
 
 ### -t THREADS, --threads THREADS
-Number of threads to use for downloading the manga. Default is 10.
+Number of threads to use for downloading the manga. Default is 15.
 
 This can speed up the download process.
 
