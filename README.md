@@ -1,24 +1,32 @@
 # Mangaread Downloader
+
 This script helps you to download manga from mangaread.org.
 
 ## Requirements
+
 - Python 3.6 or higher.
 - Modules: `pip install -r requirements.txt`.
 
 ## Recommended
+
 - If on Linux, running:
+
 ```bash
 alias mangaread-dl="python ~/PATH/TO/SCRIPT/mangaread-dl.py"
 ```
+
 Will allow you to run the script from anywhere with the command `mangaread-dl`. The output directory will be the current directory + `mangaread-dl/`.
 
 ## Usage
+
 - `python mangaread.py -h` for help.
 - `python mangaread.py -u "URL_MANGA"` to download the manga from the URL.
 - `python mangaread.py` The script will ask you for the URL, name and format to convert the manga.
 
 ## Parameters
+
 ### -h, --help
+
 Show the help message and exit.
 
 ```bash
@@ -26,6 +34,7 @@ python mangaread.py -h
 ```
 
 ### -u URL, --url URL
+
 URL of the manga to download.
 
 ```bash
@@ -33,6 +42,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece"
 ```
 
 ### -mn MANGA_NAME, --manga-name MANGA_NAME
+
 Name of the manga to download. If not specified, the name will be extracted from the URL.
 
 ```bash
@@ -40,6 +50,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -mn "One Piec
 ```
 
 ### -c FORMAT, --convert FORMAT
+
 Convert the manga to the specified format. The format can be `zip` or `cbz`.
 
 ```bash
@@ -47,6 +58,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -c "zip"
 ```
 
 ### -cof, --convert-one-file
+
 Convert the manga to one file instead of one file per chapter.
 
 ```bash
@@ -54,6 +66,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -c "zip" -cof
 ```
 
 ### -t THREADS, --threads THREADS
+
 Number of threads to use for downloading the manga. Default is 15.
 
 This can speed up the download process.
@@ -63,6 +76,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -t 20
 ```
 
 ### -f, --force
+
 Force to download the whole manga even if chapters already exists.
 
 ```bash
@@ -70,14 +84,15 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -f
 ```
 
 ### -d, --debug
+
 Show debug messages.
 
 ```bash
 python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -d
 ```
 
-
 ## Example
+
 Force download of the manga One Piece in cbz format in one file with 20 threads.
 
 ```bash
@@ -85,6 +100,7 @@ python mangaread.py -u "https://www.mangaread.org/manga/one-piece" -c "cbz" -cof
 ```
 
 Output directory will look like:
+
 ```text
 ./
 ./manga/
@@ -103,9 +119,11 @@ Output directory will look like:
 ```
 
 ## License
+
 This project is open source and available under the [MIT License](LICENSE).
 
 ## Disclaimer
+
 This script is for educational purposes and to promote the usefulness of my `modernqueue` module only. I am not responsible for any misuse of this script.
 
 Also, I am not affiliated with mangaread.org in any way. And I do not own any of the manga downloaded with this script.

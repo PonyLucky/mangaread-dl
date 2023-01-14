@@ -24,6 +24,7 @@ from datetime import datetime
 from modernqueue import ModernQueue
 from zipfile import ZipFile
 
+
 class Mangaread:
     def __init__(self, url_manga: str, name: str, nb_threads: int = 15, debug: bool = False) -> None:
         # Debug mode
